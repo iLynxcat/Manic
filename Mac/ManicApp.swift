@@ -5,9 +5,13 @@ import SwiftData
 struct ManicApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            AbletonProject.self,
+			AbletonSet.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let modelConfiguration = ModelConfiguration(
+			schema: schema,
+			isStoredInMemoryOnly: true
+		)
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
@@ -18,8 +22,19 @@ struct ManicApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ProjectsView()
+				.tint(.blue)
         }
-        .modelContainer(sharedModelContainer)
+		.modelContainer(sharedModelContainer)
     }
+}
+
+@inlinable public func printing<ValueType: Any>(_ value: ValueType) -> ValueType {
+	debugPrint("\(value)")
+	return value
+}
+
+@inlinable public func printing<ValueType: Any>(_ prefix: String = "", _ value: ValueType, _ suffix: String = "") -> ValueType {
+	debugPrint("\(prefix)\(value)\(suffix)")
+	return value
 }
