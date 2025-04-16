@@ -36,33 +36,8 @@ struct ProjectDetailView: View {
 					} else {
 						VStack(spacing: 0) {
 							ForEach(nonBackupSets) { set in
-								Button {
-									openSet(set)
-								} label: {
-									HStack(alignment: .center) {
-										VStack(alignment: .leading) {
-											Text(set.name)
-												.font(.body)
-											Text(
-												formatRelativeTime(
-													set.modifiedAt)
-											)
-											.font(.caption)
-											.foregroundStyle(.secondary)
-										}
-										Spacer()
-										Text("Open")
-											.foregroundStyle(.tertiary)
-										Image(systemName: "chevron.right")
-											.font(.caption)
-											.foregroundStyle(.secondary)
-									}
-									.padding(.horizontal, 4)
-									.padding(.vertical, 10)
-								}
-								.background(.clear)
-								.buttonStyle(.plain)
-
+								AlsFileItem(set: set)
+								
 								if set.id != nonBackupSets.last?.id {
 									Divider()
 										.padding(.horizontal, 6)
@@ -70,18 +45,56 @@ struct ProjectDetailView: View {
 							}
 						}
 						.listWidth()
-						.padding(.vertical, -4)
-						//					.groupBoxStyle(GroupBoxStyle)
 					}
 				} label: {
 					Text("Live Sets")
 						.font(.body)
 						.fontWeight(.medium)
 				}
+				.padding(.vertical, -4)
 			}
 			.padding()
 		}
 		.background(.windowBackground)
+	}
+}
+
+private struct AlsFileItem: View {
+	let set: AbletonSet
+	
+	var body: some View {
+				Button {
+					openSet(set)
+				} label: {
+					HStack(alignment: .center) {
+						Image("ALSFile")
+							.resizable()
+							.aspectRatio(contentMode: .fit)
+							.frame(width: 24, height:24)
+							.padding(.leading, 4)
+						
+						VStack(alignment: .leading) {
+							Text(set.name)
+								.font(.body)
+							Text(
+								formatRelativeTime(
+									set.modifiedAt)
+							)
+							.font(.caption)
+							.foregroundStyle(.secondary)
+						}
+						Spacer()
+						Text("Open")
+							.foregroundStyle(.tertiary)
+						Image(systemName: "chevron.right")
+							.font(.caption)
+							.foregroundStyle(.secondary)
+					}
+					.padding(.horizontal, 4)
+					.padding(.vertical, 10)
+					.background(.white.opacity(0.0001))
+				}
+				.buttonStyle(.plain)
 	}
 
 	private func openSet(_ set: AbletonSet) {
