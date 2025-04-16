@@ -4,66 +4,116 @@ import SwiftUI
 struct ProjectOverviewView: View {
 	var project: AbletonProject
 
+	var nonBackupSets: [AbletonSet] {
+		project.sets.filter { set in
+			let path = set.path
+			let backupIndex = path.pathComponents.lastIndex(of: "Backup")
+
+			return backupIndex != (path.pathComponents.count - 2)
+		}
+	}
+
 	var body: some View {
 		ScrollView(.vertical) {
-			GroupBox {
-				if project.sets.isEmpty {
+			VStack {
+				GroupBox {
 					ContentUnavailableView {
-						Label("No Sets", systemImage: "questionmark.folder")
-					} description: {
-						Text("This project has no Ableton sets")
+						Label(project.name, image: "ProjectFolder")
 					}
 					.listWidth()
-					.padding()
-				} else {
-					VStack(spacing: 0) {
-						ForEach(project.sets.filter { set in
-							let path = set.path
-							let backupIndex = path.pathComponents.lastIndex(of: "Backup")
-							
-							return backupIndex != (path.pathComponents.count - 1)
-						}) { set in
-							Button {
-								// Open the set file (later implementation)
-							} label: {
-								HStack {
-									VStack(alignment: .leading) {
-										Text(set.name)
-											.font(.body)
-										Text(set.modifiedAt, style: .date)
-											.foregroundStyle(.secondary)
+				}
+				.padding(.bottom)
+
+				GroupBox {
+					if project.sets.isEmpty {
+						ContentUnavailableView {
+							Image(systemName: "questionmark.folder")
+						} description: {
+							Text("This project has no Ableton sets")
+						}
+						.listWidth()
+						.padding()
+					} else {
+						VStack(spacing: 0) {
+							ForEach(nonBackupSets) { set in
+								Button {
+									openSet(set)
+								} label: {
+									HStack(alignment: .center) {
+										VStack(alignment: .leading) {
+											Text(set.name)
+												.font(.body)
+											Text(
+												formatRelativeTime(
+													set.modifiedAt)
+											)
 											.font(.caption)
+											.foregroundStyle(.secondary)
+										}
+										Spacer()
+										Text("Open")
+											.foregroundStyle(.tertiary)
+										Image(systemName: "chevron.right")
+											.font(.caption)
+											.foregroundStyle(.secondary)
 									}
-									Spacer()
-									Image(systemName: "arrow.right.circle")
-										.foregroundStyle(.secondary)
+									.padding(.horizontal, 4)
+									.padding(.vertical, 10)
 								}
-								.contentShape(Rectangle())
-								.padding(.vertical, 6)
-								.padding(.horizontal, 4)
-							}
-							.buttonStyle(.plain)
-							
-							if set.id != project.sets.last?.id {
-								Divider()
+								.background(.clear)
+								.buttonStyle(.plain)
+
+								if set.id != nonBackupSets.last?.id {
+									Divider()
+										.padding(.horizontal, 6)
+								}
 							}
 						}
+						.listWidth()
+						.padding(.vertical, -4)
+						//					.groupBoxStyle(GroupBoxStyle)
 					}
-					.listWidth()
-					.padding(.vertical, 4)
+				} label: {
+					Text("Live Sets")
+						.font(.body)
+						.fontWeight(.medium)
 				}
-			} label: {
-				Label("Sets", systemImage: "document.fill")
 			}
-			.padding(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+			.padding()
 		}
 		.background(.windowBackground)
 	}
+
+	private func openSet(_ set: AbletonSet) {
+		let gotAccess = set.path
+			.startAccessingSecurityScopedResource()
+		guard gotAccess else {
+			return
+		}
+		defer {
+			set.path.stopAccessingSecurityScopedResource()
+		}
+
+		NSWorkspace.shared.open(set.path)
+	}
+
+	private var relativeDateFormatter: RelativeDateTimeFormatter {
+		let formatter = RelativeDateTimeFormatter()
+		formatter.unitsStyle = .full
+
+		return formatter
+	}
+
+	private func formatRelativeTime(_ date: Date) -> String {
+		return relativeDateFormatter.localizedString(
+			for: date, relativeTo: .now)
+	}
 }
 
-private extension View {
-	func listWidth() -> some View {
-		return self
+extension View {
+	fileprivate func listWidth() -> some View {
+		return
+			self
 			.frame(minWidth: 320, idealWidth: 420, maxWidth: 512)
 	}
 }
@@ -96,7 +146,7 @@ private extension View {
 #Preview("Overview (No Sets)") {
 	let container = previewContainer
 	let project = generateDemoProject()
-	
+
 	do {
 		let _ = container.mainContext.insert(project)
 	}

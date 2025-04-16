@@ -51,7 +51,7 @@ struct ProjectsView: View {
 					Button {
 						presentFolderChooser = true
 					} label: {
-						Label("Scan folder", systemImage: "plus.circle.fill")
+						Label("Scan", systemImage: "plus.circle.fill")
 					}
 				}
 			}
