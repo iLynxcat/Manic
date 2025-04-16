@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-struct ProjectOverviewView: View {
+struct ProjectDetailView: View {
 	var project: AbletonProject
 
 	var nonBackupSets: [AbletonSet] {
@@ -132,7 +132,7 @@ extension View {
 		let _ = container.mainContext.insert(project)
 	}
 
-	ProjectOverviewView(project: project)
+	ProjectDetailView(project: project)
 		.modelContainer(container)
 		.frame(
 			minWidth: 256,
@@ -151,7 +151,7 @@ extension View {
 		let _ = container.mainContext.insert(project)
 	}
 
-	ProjectOverviewView(project: project)
+	ProjectDetailView(project: project)
 		.modelContainer(container)
 		.frame(
 			minWidth: 256,
