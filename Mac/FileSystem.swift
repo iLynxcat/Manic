@@ -2,17 +2,17 @@ import Foundation
 
 struct FileScanner {
 	private let fileManager = FileManager.default
-	
+
 	func scanProjectsRecursively(in path: URL) -> [URL] {
 		let url = path.absoluteURL
-		
+
 		let children = try! fileManager.contentsOfDirectory(
 			at: url,
 			includingPropertiesForKeys: [.isDirectoryKey, .isRegularFileKey]
 		)
-		
+
 		var projects: [URL] = []
-		
+
 		for child in children {
 			if child.terminatesWithProjectLiterally && child.isDirectory {
 				projects.append(child)
@@ -23,44 +23,42 @@ struct FileScanner {
 				continue
 			}
 		}
-		
+
 		return projects
 	}
-	
+
 	func scanAlsRecursively(in path: URL) -> [URL] {
 		let url = path.absoluteURL
 		let children = try! fileManager.contentsOfDirectory(
 			at: url,
-			includingPropertiesForKeys: [.isRegularFileKey, .contentModificationDateKey]
+			includingPropertiesForKeys: [
+				.isRegularFileKey, .contentModificationDateKey,
+			]
 		)
-		
+
 		var discoveredAls: [URL] = []
-		
+
 		for child in children {
 			if child.hasAlsExtension && child.isFile {
 				discoveredAls.append(child)
-				print("ALS discovered: \(child.lastPathComponent)")
 				continue
 			} else if child.isDirectory {
 				discoveredAls += scanAlsRecursively(in: child)
 				continue
 			}
 		}
-		
+
 		return discoveredAls
 	}
 }
 
-private extension URL {
-	var terminatesWithProjectLiterally: Bool {
-		return printing(
-			"\(self.lastPathComponent).terminatesWithProjectLiterally=",
-			self.lastPathComponent.wholeMatch(of: /.+\ Project$/) != nil
-		)
+extension URL {
+	fileprivate var terminatesWithProjectLiterally: Bool {
+		return self.lastPathComponent.wholeMatch(of: /.+\ Project$/) != nil
 	}
-	
-	var hasAlsExtension: Bool {
-		return printing("\(self.lastPathComponent).hasAlsExtension=", self.pathExtension == "als")
+
+	fileprivate var hasAlsExtension: Bool {
+		return self.pathExtension == "als"
 	}
 }
 
@@ -68,19 +66,20 @@ extension URL {
 	var baseName: String {
 		self.deletingPathExtension().lastPathComponent
 	}
-	
+
 	var isDirectory: Bool {
-		let isDir = (try? self.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
-		return printing("\(self.lastPathComponent).isDir=", isDir)
+		return (try? self.resourceValues(forKeys: [.isDirectoryKey]))?
+			.isDirectory == true
 	}
-	
+
 	var isFile: Bool {
-		let isFile = (try? self.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true
-		return printing("\(self.lastPathComponent).isFile=", isFile)
+		return (try? self.resourceValues(forKeys: [.isRegularFileKey]))?
+			.isRegularFile == true
 	}
-	
+
 	var modificationDate: Date {
-		let modDate = (try? self.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate ?? Date.distantPast
-		return printing("\(self.lastPathComponent).modificationDate=", modDate)
+		return
+			(try? self.resourceValues(forKeys: [.contentModificationDateKey]))?
+			.contentModificationDate ?? Date.distantPast
 	}
 }
