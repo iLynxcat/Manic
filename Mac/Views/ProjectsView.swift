@@ -139,6 +139,7 @@ struct ProjectsView: View {
 	}
 }
 
+#if DEBUG
 #Preview("Empty") {
 	let container = previewContainer
 
@@ -160,3 +161,4 @@ struct ProjectsView: View {
 	ProjectsView()
 		.modelContainer(container)
 }
+#endif

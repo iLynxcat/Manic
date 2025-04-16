@@ -41,6 +41,7 @@ struct SidebarProjectItemView: View {
 	}
 }
 
+#if DEBUG
 #Preview {
 	let container = previewContainer
 	let project = generateDemoProject()
@@ -54,3 +55,4 @@ struct SidebarProjectItemView: View {
 		.background(.white)
 		.modelContainer(container)
 }
+#endif
