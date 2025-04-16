@@ -52,7 +52,7 @@ func generateDemoSet(in project: AbletonProject) -> AbletonSet {
 	let name = "\(namePair.0) \(namePair.1)"
 	
 	return project.addSet(
-		at: project.path.appending(path: "Backup/\(name).als"),
+		at: project.path.appending(path: "\(name).als"),
 		name: name,
 		modified: twoWeeksAgo
 	)
