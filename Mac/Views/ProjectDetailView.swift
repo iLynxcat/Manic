@@ -118,6 +118,7 @@ extension View {
 	}
 }
 
+#if DEBUG
 #Preview("Overview (With Sets)") {
 	let container = previewContainer
 	let project = generateDemoProject()
@@ -161,3 +162,4 @@ extension View {
 			maxHeight: .infinity
 		)
 }
+#endif
