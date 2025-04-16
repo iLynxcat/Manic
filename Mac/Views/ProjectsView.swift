@@ -6,42 +6,56 @@ private let fileManager = FileManager.default
 struct ProjectsView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Query private var projects: [AbletonProject]
-
+	
 	var sortedProjects: [AbletonProject] {
 		projects.sorted {
 			$0.modifiedAt.compare($1.modifiedAt) == .orderedDescending
 		}
 	}
-
+	
 	@State private var presentFolderChooser = false
 	@State private var selectedProject: AbletonProject? = nil
+	private let columnVisibility: Binding<NavigationSplitViewVisibility> = .constant(.all)
 	
 	private var fileScanner = FileScanner()
-
+	
 	var body: some View {
 		NavigationSplitView(
-			columnVisibility: .constant(.all)
+			columnVisibility: columnVisibility
 		) {
-			List(sortedProjects, selection: $selectedProject) { project in
-				NavigationLink {
-					ProjectOverviewView(project: project)
-						.navigationTitle(project.name)
-				} label: {
-					SidebarProjectView(showing: project)
+			VStack {
+				if projects.isEmpty {
+					ContentUnavailableView {
+						Image(systemName: "questionmark.folder")
+					} description: {
+						Text("No projects")
+					}
+				} else {
+					List(
+						sortedProjects,
+						selection: $selectedProject
+					) { project in
+						NavigationLink {
+							ProjectOverviewView(project: project)
+								.navigationTitle(project.name)
+						} label: {
+							SidebarProjectView(showing: project)
+						}
+					}
 				}
 			}
+			.frame(minWidth: 170)
+			.toolbar(removing: .sidebarToggle)
 			.toolbar {
-				ToolbarItem {
+				ToolbarItem(placement: .primaryAction) {
 					Button {
 						presentFolderChooser = true
 					} label: {
-						Label("Add Folder", systemImage: "folder.badge.plus")
+						Label("Scan folder", systemImage: "plus.circle.fill")
 					}
 				}
 			}
 		} detail: {
-			// todo: some fancy logo ident/welcome screen here
-			Text("No project selected")
 		}
 		.fileImporter(
 			isPresented: $presentFolderChooser,
@@ -51,24 +65,24 @@ struct ProjectsView: View {
 		)
 		.navigationTitle("Projects")
 	}
-
+	
 	private func addScanPath(_ result: Result<[URL], any Error>) {
 		presentFolderChooser = false
-
+		
 		switch result {
 		case .success(let folders):
 			for folder in folders {
 				let didGetAccess =
-					folder.startAccessingSecurityScopedResource()
+				folder.startAccessingSecurityScopedResource()
 				guard didGetAccess else {
 					return
 				}
 				defer {
 					folder.stopAccessingSecurityScopedResource()
 				}
-
+				
 				// TODO: store and track the chosen folder(s) -- as of now we only scan them the one time
-
+				
 				withAnimation(.spring) {
 					// 1. parse for whether each children are ableton project
 					// TODO: later check if provided folder matches too, users may want to just add one project
@@ -77,11 +91,11 @@ struct ProjectsView: View {
 					{
 						let alsFiles = fileScanner
 							.scanAlsRecursively(in: projectPath)
-
+						
 						guard !alsFiles.isEmpty else {
 							continue
 						}
-
+						
 						let project = AbletonProject(
 							name:
 								projectPath
@@ -90,7 +104,7 @@ struct ProjectsView: View {
 								.replacing(/\ Project$/, with: ""),
 							at: projectPath)
 						modelContext.insert(project)
-
+						
 						alsFiles.map { file in
 							AbletonSet(
 								in: project,
@@ -113,7 +127,7 @@ struct ProjectsView: View {
 			)
 		}
 	}
-
+	
 	private func deleteItems(offsets: IndexSet) {
 		withAnimation {
 			for _ in offsets {
@@ -123,7 +137,24 @@ struct ProjectsView: View {
 	}
 }
 
-#Preview {
+#Preview("Empty") {
+	let container = previewContainer
+	
 	ProjectsView()
-		.modelContainer(for: AbletonProject.self, inMemory: true)
+		.modelContainer(container)
+}
+
+#Preview("With Projects") {
+	let container = previewContainer
+	
+	do {
+		let _ = [
+			generateDemoProject(),
+			generateDemoProject(),
+			generateDemoProject()
+		].forEach(container.mainContext.insert)
+	}
+	
+	ProjectsView()
+		.modelContainer(container)
 }
