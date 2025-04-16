@@ -4,23 +4,14 @@ import SwiftUI
 struct ProjectDetailView: View {
 	var project: AbletonProject
 
-	var nonBackupSets: [AbletonSet] {
-		project.sets.filter { set in
-			let path = set.path
-			let backupIndex = path.pathComponents.lastIndex(of: "Backup")
-
-			return backupIndex != (path.pathComponents.count - 2)
-		}
-	}
-
 	var body: some View {
 		ScrollView(.vertical) {
 			VStack {
 				GroupBox {
-					ContentUnavailableView {
-						Label(project.name, image: "ProjectFolder")
-					}
-					.listWidth()
+					ProjectDetailHeaderView(project: project)
+						.padding(.horizontal, 16)
+						.padding(.vertical, 52)
+						.listWidth()
 				}
 				.padding(.bottom)
 
@@ -35,66 +26,69 @@ struct ProjectDetailView: View {
 						.padding()
 					} else {
 						VStack(spacing: 0) {
-							ForEach(nonBackupSets) { set in
+							ForEach(project.sets) { set in
 								AlsFileItem(set: set)
-								
-								if set.id != nonBackupSets.last?.id {
+
+								if set.id != project.sets.last?.id {
 									Divider()
 										.padding(.horizontal, 6)
 								}
 							}
 						}
 						.listWidth()
+						.padding(.vertical, -4)
 					}
 				} label: {
 					Text("Live Sets")
 						.font(.body)
 						.fontWeight(.medium)
+						.padding(.bottom, 6)
 				}
-				.padding(.vertical, -4)
 			}
 			.padding()
 		}
+		.toolbarTitleMenu(content: {
+			Text("Heyyyy")
+			Button {} label: { Text("Hiii!") }
+		})
 		.background(.windowBackground)
 	}
 }
 
 private struct AlsFileItem: View {
 	let set: AbletonSet
-	
+
 	var body: some View {
-				Button {
-					openSet(set)
-				} label: {
-					HStack(alignment: .center) {
-						Image("ALSFile")
-							.resizable()
-							.aspectRatio(contentMode: .fit)
-							.frame(width: 24, height:24)
-							.padding(.leading, 4)
-						
-						VStack(alignment: .leading) {
-							Text(set.name)
-								.font(.body)
-							Text(
-								formatRelativeTime(
-									set.modifiedAt)
-							)
-							.font(.caption)
-							.foregroundStyle(.secondary)
-						}
-						Spacer()
-						Text("Open")
-							.foregroundStyle(.tertiary)
-						Image(systemName: "chevron.right")
-							.font(.caption)
-							.foregroundStyle(.secondary)
-					}
-					.padding(.horizontal, 4)
-					.padding(.vertical, 10)
-					.background(.white.opacity(0.0001))
+		Button {
+			openSet(set)
+		} label: {
+			HStack(alignment: .center) {
+				Image("ALSFileSmall")
+					.padding(.leading, 4)
+
+				VStack(alignment: .leading) {
+					Text(set.name)
+						.font(.body)
+					Text(
+						formatRelativeTime(
+							set.modifiedAt)
+					)
+					.font(.caption)
+					.foregroundStyle(.secondary)
 				}
-				.buttonStyle(.plain)
+				Spacer()
+
+				//				Text("Open")
+				//					.foregroundStyle(.tertiary)
+				Image(systemName: "arrow.right.circle")
+					.font(.caption)
+					.foregroundStyle(.secondary)
+			}
+			.padding(.horizontal, 4)
+			.padding(.vertical, 10)
+			.overlay(.primary.opacity(0.00001))
+		}
+		.buttonStyle(.plain)
 	}
 
 	private func openSet(_ set: AbletonSet) {
@@ -108,6 +102,19 @@ private struct AlsFileItem: View {
 		}
 
 		NSWorkspace.shared.open(set.path)
+	}
+
+	private func openProjectFolder(_ project: AbletonProject) {
+		let gotAccess = project.path
+			.startAccessingSecurityScopedResource()
+		guard gotAccess else {
+			return
+		}
+		defer {
+			set.path.stopAccessingSecurityScopedResource()
+		}
+
+		NSWorkspace.shared.open(project.path)
 	}
 
 	private var relativeDateFormatter: RelativeDateTimeFormatter {
@@ -132,47 +139,47 @@ extension View {
 }
 
 #if DEBUG
-#Preview("Overview (With Sets)") {
-	let container = previewContainer
-	let project = generateDemoProject()
-	let sets = [
-		generateDemoSet(in: project),
-		generateDemoSet(in: project),
-		generateDemoSet(in: project),
-	]
+	#Preview("Overview (With Sets)") {
+		let container = previewContainer
+		let project = generateDemoProject()
+		let sets = [
+			generateDemoSet(in: project),
+			generateDemoSet(in: project),
+			generateDemoSet(in: project),
+		]
 
-	do {
-		let _ = sets.forEach(container.mainContext.insert)
-		let _ = container.mainContext.insert(project)
+		do {
+			let _ = sets.forEach(container.mainContext.insert)
+			let _ = container.mainContext.insert(project)
+		}
+
+		ProjectDetailView(project: project)
+			.modelContainer(container)
+			.frame(
+				minWidth: 256,
+				idealWidth: 420,
+				maxWidth: 590,
+				minHeight: 100,
+				maxHeight: .infinity
+			)
 	}
 
-	ProjectDetailView(project: project)
-		.modelContainer(container)
-		.frame(
-			minWidth: 256,
-			idealWidth: 420,
-			maxWidth: 590,
-			minHeight: 100,
-			maxHeight: .infinity
-		)
-}
+	#Preview("Overview (No Sets)") {
+		let container = previewContainer
+		let project = generateDemoProject()
 
-#Preview("Overview (No Sets)") {
-	let container = previewContainer
-	let project = generateDemoProject()
+		do {
+			let _ = container.mainContext.insert(project)
+		}
 
-	do {
-		let _ = container.mainContext.insert(project)
+		ProjectDetailView(project: project)
+			.modelContainer(container)
+			.frame(
+				minWidth: 256,
+				idealWidth: 420,
+				maxWidth: 590,
+				minHeight: 100,
+				maxHeight: .infinity
+			)
 	}
-
-	ProjectDetailView(project: project)
-		.modelContainer(container)
-		.frame(
-			minWidth: 256,
-			idealWidth: 420,
-			maxWidth: 590,
-			minHeight: 100,
-			maxHeight: .infinity
-		)
-}
 #endif
