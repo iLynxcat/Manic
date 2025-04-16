@@ -65,66 +65,67 @@ struct ProjectsView: View {
 		)
 		.navigationTitle("Projects")
 	}
-	
+
 	private func addScanPath(_ result: Result<[URL], any Error>) {
-		presentFolderChooser = false
-		
-		switch result {
-		case .success(let folders):
-			for folder in folders {
-				let didGetAccess =
-				folder.startAccessingSecurityScopedResource()
-				guard didGetAccess else {
-					return
-				}
-				defer {
-					folder.stopAccessingSecurityScopedResource()
-				}
-				
-				// TODO: store and track the chosen folder(s) -- as of now we only scan them the one time
-				
-				withAnimation(.spring) {
-					// 1. parse for whether each children are ableton project
-					// TODO: later check if provided folder matches too, users may want to just add one project
-					for projectPath in fileScanner.scanProjectsRecursively(
-						in: folder)
-					{
-						let alsFiles = fileScanner
-							.scanAlsRecursively(in: projectPath)
-						
-						guard !alsFiles.isEmpty else {
-							continue
-						}
-						
-						let project = AbletonProject(
-							name:
-								projectPath
-								.deletingPathExtension()
-								.lastPathComponent
-								.replacing(/\ Project$/, with: ""),
-							at: projectPath)
-						modelContext.insert(project)
-						
-						alsFiles.map { file in
-							AbletonSet(
-								in: project,
-								at: file,
-								name: file.baseName,
-								modified: file.modificationDate
-							)
-						}.forEach { set in
-							modelContext.insert(set)
-							project.sets.append(set)
-						}
+		DispatchQueue.main.async {
+			switch result {
+			case .success(let folders):
+				for folder in folders {
+					let didGetAccess =
+					folder.startAccessingSecurityScopedResource()
+					guard didGetAccess else {
+						return
+					}
+					defer {
+						folder.stopAccessingSecurityScopedResource()
 					}
 					
-					try! modelContext.save()
+					// TODO: store and track the chosen folder(s) -- as of now we only scan them the one time
+					
+					withAnimation {
+						// 1. parse for whether each children are ableton project
+						// TODO: later check if provided folder matches too, users may want to just add one project
+						for projectPath in fileScanner.scanProjectsRecursively(
+							in: folder)
+						{
+							let alsFiles =
+							fileScanner
+								.scanAlsRecursively(in: projectPath)
+							
+							guard !alsFiles.isEmpty else {
+								continue
+							}
+							
+							let project = AbletonProject(
+								name:
+									projectPath
+									.deletingPathExtension()
+									.lastPathComponent
+									.replacing(/\ Project$/, with: ""),
+								at: projectPath)
+							modelContext.insert(project)
+							
+							alsFiles.map { file in
+								AbletonSet(
+									in: project,
+									at: file,
+									name: file.baseName,
+									modified: file.modificationDate
+								)
+							}.forEach { set in
+								modelContext.insert(set)
+								project.sets.append(set)
+							}
+						}
+						
+						try! modelContext.save()
+					}
 				}
+			case .failure(let error):
+				fatalError(
+					"Crashed during onCompletion handler for importing new folders to scan: \(error)"
+				)
 			}
-		case .failure(let error):
-			fatalError(
-				"Crashed during onCompletion handler for importing new folders to scan: \(error)"
-			)
 		}
 	}
 	
