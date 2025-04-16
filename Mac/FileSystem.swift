@@ -16,7 +16,6 @@ struct FileScanner {
 		for child in children {
 			if child.terminatesWithProjectLiterally && child.isDirectory {
 				projects.append(child)
-				print("Project candidate: \(child.lastPathComponent)")
 				continue
 			} else if child.isDirectory {
 				projects += scanProjectsRecursively(in: child)
