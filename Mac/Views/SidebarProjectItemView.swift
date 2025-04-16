@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-struct SidebarProjectView: View {
+struct SidebarProjectItemView: View {
 	var project: AbletonProject
 
 	private var formattedTime: String
@@ -49,7 +49,7 @@ struct SidebarProjectView: View {
 		let _ = container.mainContext.insert(project)
 	}
 
-	SidebarProjectView(showing: project)
+	SidebarProjectItemView(showing: project)
 		.padding(4)
 		.background(.white)
 		.modelContainer(container)

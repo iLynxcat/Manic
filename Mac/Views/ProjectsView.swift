@@ -6,19 +6,20 @@ private let fileManager = FileManager.default
 struct ProjectsView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Query private var projects: [AbletonProject]
-	
+
 	var sortedProjects: [AbletonProject] {
 		projects.sorted {
 			$0.modifiedAt.compare($1.modifiedAt) == .orderedDescending
 		}
 	}
-	
+
 	@State private var presentFolderChooser = false
 	@State private var selectedProject: AbletonProject? = nil
-	private let columnVisibility: Binding<NavigationSplitViewVisibility> = .constant(.all)
-	
+	private let columnVisibility: Binding<NavigationSplitViewVisibility> =
+		.constant(.all)
+
 	private var fileScanner = FileScanner()
-	
+
 	var body: some View {
 		NavigationSplitView(
 			columnVisibility: columnVisibility
@@ -36,10 +37,10 @@ struct ProjectsView: View {
 						selection: $selectedProject
 					) { project in
 						NavigationLink {
-							ProjectOverviewView(project: project)
+							ProjectDetailView(project: project)
 								.navigationTitle(project.name)
 						} label: {
-							SidebarProjectView(showing: project)
+							SidebarProjectItemView(showing: project)
 						}
 					}
 				}
@@ -128,7 +129,7 @@ struct ProjectsView: View {
 			}
 		}
 	}
-	
+
 	private func deleteItems(offsets: IndexSet) {
 		withAnimation {
 			for _ in offsets {
@@ -140,22 +141,22 @@ struct ProjectsView: View {
 
 #Preview("Empty") {
 	let container = previewContainer
-	
+
 	ProjectsView()
 		.modelContainer(container)
 }
 
 #Preview("With Projects") {
 	let container = previewContainer
-	
+
 	do {
 		let _ = [
 			generateDemoProject(),
 			generateDemoProject(),
-			generateDemoProject()
+			generateDemoProject(),
 		].forEach(container.mainContext.insert)
 	}
-	
+
 	ProjectsView()
 		.modelContainer(container)
 }
