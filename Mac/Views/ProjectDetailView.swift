@@ -134,7 +134,7 @@ private struct AlsFileItem: View {
 			return
 		}
 		defer {
-			set.path.stopAccessingSecurityScopedResource()
+			project.path.stopAccessingSecurityScopedResource()
 		}
 
 		NSWorkspace.shared.open(project.path)
