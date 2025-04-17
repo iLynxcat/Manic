@@ -21,7 +21,7 @@ struct SidebarProjectItemView: View {
 	}
 
 	var body: some View {
-		let quickStats = [formattedTime, "\(project.sets.count) sets"]
+		let quickStats = [formattedTime, "\(project.nonBackupSets.count) set\(project.nonBackupSets.count == 1 ? "" : "s")"]
 
 		HStack(alignment: .top, spacing: 6) {
 			Image(systemName: "folder.fill")
