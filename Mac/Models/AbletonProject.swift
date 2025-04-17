@@ -12,15 +12,16 @@ final class AbletonProject {
 	@Relationship(deleteRule: .cascade, inverse: \AbletonSet.project)
 	var sets = [AbletonSet]()
 	var backupSets: [AbletonSet] {
-		do {
-			return try sets.filter(#Predicate<AbletonSet> { set in
-				set.path.absoluteString.contains("Backup")
-			})
-		} catch {
-			return []
-		}
+		sets.filter({ set in
+			set.path.deletingLastPathComponent().lastPathComponent == "Backup"
+		})
 	}
-	
+	var nonBackupSets: [AbletonSet] {
+		sets.filter({ set in
+			set.path.deletingLastPathComponent().lastPathComponent != "Backup"
+		})
+	}
+
 	var modifiedAt: Date {
 		self.sets
 			.map { $0.modifiedAt }
@@ -36,7 +37,9 @@ final class AbletonProject {
 }
 
 extension AbletonProject {
-	func addSet(at path: URL, name: String, modified modifiedAt: Date) -> AbletonSet {
+	func insertSet(at path: URL, name: String, modified modifiedAt: Date)
+		-> AbletonSet
+	{
 		let newSet = AbletonSet(
 			in: self, at: path, name: name, modified: modifiedAt)
 		self.sets.append(newSet)

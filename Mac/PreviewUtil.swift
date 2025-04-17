@@ -51,8 +51,30 @@ func generateDemoSet(in project: AbletonProject) -> AbletonSet {
 	}()
 	let name = "\(namePair.0) \(namePair.1)"
 	
-	return project.addSet(
+	return project.insertSet(
 		at: project.path.appending(path: "\(name).als"),
+		name: name,
+		modified: twoWeeksAgo
+	)
+}
+
+func generateDemoBackupSet(in project: AbletonProject) -> AbletonSet {
+	let namePair: NamePair = {
+		let freshPair = randomNamePair()
+		let projectName = project.name.split(separator: " ")
+		switch [0, 1].randomElement()! {
+		case 0:
+			return (freshPair.0, String(projectName[1]))
+		case 1:
+			return (String(projectName[0]), freshPair.1)
+		default:
+			fatalError("Invalid name mode")
+		}
+	}()
+	let name = "\(namePair.0) \(namePair.1)"
+	
+	return project.insertSet(
+		at: project.path.appending(components: "Backup", "\(name) [0000-00-00 000000].als"),
 		name: name,
 		modified: twoWeeksAgo
 	)

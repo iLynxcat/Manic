@@ -4,11 +4,7 @@ struct ProjectDetailHeaderView: View {
 	let project: AbletonProject
 
 	private var fileSize: Int? {
-		#if DEBUG
-			23_894_739 // TODO: make this explicitly random for the preview?
-		#else
-			try? project.path.resourceValues(forKeys: [.fileSizeKey]).fileSize
-		#endif
+		try? project.path.resourceValues(forKeys: [.fileSizeKey]).fileSize
 	}
 	private var fileSizeFormatted: String? {
 		guard let fileSizeInBytes = fileSize else { return nil }
@@ -30,10 +26,10 @@ struct ProjectDetailHeaderView: View {
 				.bold()
 
 			HStack(alignment: .firstTextBaseline, spacing: 10) {
-				Text("\(project.sets.count - project.backupSets.count) sets")
-				
-				if fileSizeFormatted != nil {
-					Text(fileSizeFormatted!)
+				Text("\(project.sets.count - project.backupSets.count) set\(project.sets.count == 1 ? "" : "s")")
+
+				if let fileSizeFormatted {
+					Text(fileSizeFormatted)
 				}
 			}
 			.font(.body)
@@ -45,7 +41,7 @@ struct ProjectDetailHeaderView: View {
 #Preview {
 	let project = generateDemoProject()
 	let _ = generateDemoSet(in: project)
-	
+
 	ProjectDetailHeaderView(project: project)
 		.padding()
 }
