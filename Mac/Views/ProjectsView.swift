@@ -73,16 +73,16 @@ struct ProjectsView: View {
 			case .success(let folders):
 				for folder in folders {
 					let didGetAccess =
-					folder.startAccessingSecurityScopedResource()
+						folder.startAccessingSecurityScopedResource()
 					guard didGetAccess else {
 						return
 					}
 					defer {
 						folder.stopAccessingSecurityScopedResource()
 					}
-					
+
 					// TODO: store and track the chosen folder(s) -- as of now we only scan them the one time
-					
+
 					withAnimation {
 						// 1. parse for whether each children are ableton project
 						// TODO: later check if provided folder matches too, users may want to just add one project
@@ -90,13 +90,13 @@ struct ProjectsView: View {
 							in: folder)
 						{
 							let alsFiles =
-							fileScanner
+								fileScanner
 								.scanAlsRecursively(in: projectPath)
-							
+
 							guard !alsFiles.isEmpty else {
 								continue
 							}
-							
+
 							let project = AbletonProject(
 								name:
 									projectPath
@@ -105,21 +105,20 @@ struct ProjectsView: View {
 									.replacing(/\ Project$/, with: ""),
 								at: projectPath)
 							modelContext.insert(project)
-							
-							alsFiles.map { file in
-								AbletonSet(
-									in: project,
-									at: file,
-									name: file.baseName,
-									modified: file.modificationDate
+
+							alsFiles.map { path in
+								project.insertSet(
+									at: path.absoluteURL,
+									name: path.baseName,
+									modified: (try? path.resourceValues(
+										forKeys: [.contentModificationDateKey])
+										.contentModificationDate)
+										?? Date.distantPast
 								)
 							}.forEach { set in
 								modelContext.insert(set)
-								project.sets.append(set)
 							}
 						}
-						
-						try! modelContext.save()
 					}
 				}
 			case .failure(let error):
@@ -140,25 +139,25 @@ struct ProjectsView: View {
 }
 
 #if DEBUG
-#Preview("Empty") {
-	let container = previewContainer
+	#Preview("Empty") {
+		let container = previewContainer
 
-	ProjectsView()
-		.modelContainer(container)
-}
-
-#Preview("With Projects") {
-	let container = previewContainer
-
-	do {
-		let _ = [
-			generateDemoProject(),
-			generateDemoProject(),
-			generateDemoProject(),
-		].forEach(container.mainContext.insert)
+		ProjectsView()
+			.modelContainer(container)
 	}
 
-	ProjectsView()
-		.modelContainer(container)
-}
+	#Preview("With Projects") {
+		let container = previewContainer
+
+		do {
+			let _ = [
+				generateDemoProject(),
+				generateDemoProject(),
+				generateDemoProject(),
+			].forEach(container.mainContext.insert)
+		}
+
+		ProjectsView()
+			.modelContainer(container)
+	}
 #endif

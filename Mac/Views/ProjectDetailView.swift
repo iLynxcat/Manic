@@ -16,7 +16,7 @@ struct ProjectDetailView: View {
 				.padding(.bottom)
 
 				GroupBox {
-					if project.sets.isEmpty {
+					if project.nonBackupSets.isEmpty {
 						ContentUnavailableView {
 							Image(systemName: "questionmark.folder")
 						} description: {
@@ -26,10 +26,10 @@ struct ProjectDetailView: View {
 						.padding()
 					} else {
 						VStack(spacing: 0) {
-							ForEach(project.sets) { set in
+							ForEach(project.nonBackupSets) { set in
 								AlsFileItem(set: set)
 
-								if set.id != project.sets.last?.id {
+								if set.id != project.nonBackupSets.last?.id {
 									Divider()
 										.padding(.horizontal, 6)
 								}
@@ -44,12 +44,37 @@ struct ProjectDetailView: View {
 						.fontWeight(.medium)
 						.padding(.bottom, 6)
 				}
+
+				if !project.backupSets.isEmpty {
+					GroupBox {
+						VStack(spacing: 0) {
+							ForEach(project.backupSets) { set in
+								AlsFileItem(set: set)
+
+								if set.id != project.backupSets.last?.id {
+									Divider()
+										.padding(.horizontal, 6)
+								}
+							}
+						}
+						.listWidth()
+						.padding(.vertical, -4)
+					} label: {
+						Text("Backups")
+							.font(.body)
+							.fontWeight(.medium)
+							.padding(.vertical, 6)
+					}
+				}
 			}
 			.padding()
 		}
 		.toolbarTitleMenu(content: {
 			Text("Heyyyy")
-			Button {} label: { Text("Hiii!") }
+			Button {
+			} label: {
+				Text("Hiii!")
+			}
 		})
 		.background(.windowBackground)
 	}
@@ -64,7 +89,7 @@ private struct AlsFileItem: View {
 		} label: {
 			HStack(alignment: .center) {
 				Image("ALSFileSmall")
-					.padding(.leading, 4)
+					.padding(.horizontal, -4)
 
 				VStack(alignment: .leading) {
 					Text(set.name)
@@ -78,10 +103,8 @@ private struct AlsFileItem: View {
 				}
 				Spacer()
 
-				//				Text("Open")
-				//					.foregroundStyle(.tertiary)
 				Image(systemName: "arrow.right.circle")
-					.font(.caption)
+					.font(.body)
 					.foregroundStyle(.secondary)
 			}
 			.padding(.horizontal, 4)
@@ -145,7 +168,7 @@ extension View {
 		let sets = [
 			generateDemoSet(in: project),
 			generateDemoSet(in: project),
-			generateDemoSet(in: project),
+			generateDemoBackupSet(in: project),
 		]
 
 		do {
