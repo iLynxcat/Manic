@@ -26,7 +26,7 @@ struct ProjectDetailHeaderView: View {
 				.bold()
 
 			HStack(alignment: .firstTextBaseline, spacing: 10) {
-				Text("\(project.sets.count - project.backupSets.count) set\(project.sets.count == 1 ? "" : "s")")
+				Text("\(project.nonBackupSets.count) set\(project.nonBackupSets.count == 1 ? "" : "s")")
 
 				if let fileSizeFormatted {
 					Text(fileSizeFormatted)
@@ -38,6 +38,7 @@ struct ProjectDetailHeaderView: View {
 	}
 }
 
+#if DEBUG
 #Preview {
 	let project = generateDemoProject()
 	let _ = generateDemoSet(in: project)
@@ -45,3 +46,4 @@ struct ProjectDetailHeaderView: View {
 	ProjectDetailHeaderView(project: project)
 		.padding()
 }
+#endif
