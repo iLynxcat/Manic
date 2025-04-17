@@ -12,7 +12,7 @@ struct ManicApp: App {
 		])
 		let modelConfiguration = ModelConfiguration(
 			schema: schema,
-			isStoredInMemoryOnly: true
+			isStoredInMemoryOnly: false
 		)
 
 		do {
@@ -31,7 +31,7 @@ struct ManicApp: App {
 					maxWidth: PROJECTS_VIEW_WIDTH,
 					minHeight: 360, idealHeight: 612, maxHeight: .infinity)
 		}
-		.defaultSize(width: PROJECTS_VIEW_WIDTH, height: PROJECTS_VIEW_WIDTH)
+		.defaultSize(width: PROJECTS_VIEW_WIDTH, height: 612)
 		.modelContainer(sharedModelContainer)
 		.windowResizability(.contentSize)
 
