@@ -8,6 +8,7 @@
 
 /* Begin PBXFileReference section */
 		B7835C242DAE5E5B0058B379 /* Manic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Manic.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B78C75E62DB1CAD900E89C73 /* Manic-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Manic-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -32,6 +33,7 @@
 		B7835C1B2DAE5E5B0058B379 = {
 			isa = PBXGroup;
 			children = (
+				B78C75E62DB1CAD900E89C73 /* Manic-Info.plist */,
 				B7835C262DAE5E5B0058B379 /* Mac */,
 				B7835C252DAE5E5B0058B379 /* Products */,
 			);
@@ -257,6 +259,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Manic-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Manic;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 iLynxcat";
@@ -287,6 +290,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Manic-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Manic;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 maxie98.net";
